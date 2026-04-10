@@ -224,6 +224,14 @@
   overflow-y: auto;
 }
 
+@media (max-width: 900px) {
+  .history-section {
+    flex: none;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+}
+
 .history-section h3 {
   font-size: 11px;
   font-weight: 500;
