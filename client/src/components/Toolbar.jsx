@@ -87,7 +87,8 @@ export default function Toolbar({ map, onExport }) {
             
             <section>
               <h3>Node Actions</h3>
-              <p>Right-click on any node to:</p>
+              <p><strong>Double-click</strong> on any node to edit its label and category.</p>
+              <p><strong>Right-click</strong> on any node to:</p>
               <ul>
                 <li><strong>Edit label</strong> — Change the node text</li>
                 <li><strong>Expand</strong> — Ask AI to add more subtopics (max 3 levels)</li>
@@ -98,7 +99,7 @@ export default function Toolbar({ map, onExport }) {
             
             <section>
               <h3>Drag & Drop</h3>
-              <p>Drag nodes to reposition them on the map. The layout will adjust automatically.</p>
+              <p><strong>Left-click and drag</strong> to reposition nodes on the map. The layout will adjust automatically.</p>
             </section>
             
             <section>
@@ -106,7 +107,6 @@ export default function Toolbar({ map, onExport }) {
               <ul>
                 <li><strong>Ctrl+Enter</strong> — Generate map from transcript</li>
                 <li><strong>Ctrl+S</strong> — Export as JSON</li>
-                <li><strong>Escape</strong> — Deselect node</li>
               </ul>
             </section>
           </div>

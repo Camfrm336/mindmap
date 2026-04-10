@@ -266,38 +266,37 @@ export default function MindMap({
       selectedGlow.transition().duration(200).attr('opacity', 0.8);
     }
     
-    // Click handler
-    node.on('click', function(event, d) {
-      event.stopPropagation();
-      if (draggedRef.current) return;
-      
-      if (d.id === selectedNodeId) {
-        // Already selected, open editor
-        const rect = containerRef.current.getBoundingClientRect();
-        setEditingPosition({
-          x: d.x,
-          y: d.y
-        });
-        setEditingNode(d);
-      } else {
-        onSelectNode(d.id);
-      }
-    });
-    
-    // Double-click handler
+    // Double-click handler - opens editor
     node.on('dblclick', function(event, d) {
       event.stopPropagation();
       setEditingPosition({ x: d.x, y: d.y });
       setEditingNode(d);
     });
     
-    // Right-click handler
+    // Right-click handler - opens context menu with boundary detection
     node.on('contextmenu', function(event, d) {
       event.preventDefault();
       event.stopPropagation();
+      
+      // Calculate menu position with boundary detection
+      const menuWidth = 180;
+      const menuHeight = 180;
+      let x = event.clientX;
+      let y = event.clientY;
+      
+      // Adjust if menu would go off right edge
+      if (x + menuWidth > window.innerWidth) {
+        x = window.innerWidth - menuWidth - 10;
+      }
+      
+      // Adjust if menu would go off bottom edge
+      if (y + menuHeight > window.innerHeight) {
+        y = window.innerHeight - menuHeight - 10;
+      }
+      
       setContextMenu({
-        x: event.clientX,
-        y: event.clientY,
+        x,
+        y,
         node: d
       });
     });

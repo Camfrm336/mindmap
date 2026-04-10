@@ -37,6 +37,7 @@ export default function App() {
   const [authSuccess, setAuthSuccess] = useState('');
   const [showLanding, setShowLanding] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   
   const {
     transcript,
@@ -265,6 +266,11 @@ export default function App() {
               <span className="user-email">{user.email}</span>
               <button className="sign-out-button" onClick={handleSignOut}>Sign Out</button>
             </div>
+            
+            <div className="help-link" onClick={() => setShowHelp(true)}>
+              <span className="help-icon">?</span> How to use this app
+            </div>
+            
             <TranscriptInput
               value={transcript}
               onChange={setTranscript}
@@ -394,6 +400,40 @@ export default function App() {
                 }
               }}
             />
+          </div>
+        </div>
+      )}
+      
+      {showHelp && (
+        <div className="help-overlay" onClick={() => setShowHelp(false)}>
+          <div className="help-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="help-close" onClick={() => setShowHelp(false)}>&times;</button>
+            <h2>How to Use</h2>
+            
+            <section>
+              <h3>Node Actions</h3>
+              <p><strong>Double-click</strong> on any node to edit its label and category.</p>
+              <p><strong>Right-click</strong> on any node to:</p>
+              <ul>
+                <li><strong>Edit label</strong> — Change the node text</li>
+                <li><strong>Expand</strong> — Ask AI to add more subtopics (max 3 levels)</li>
+                <li><strong>Delete</strong> — Remove the node and its children</li>
+                <li><strong>Copy</strong> — Copy the node text to clipboard</li>
+              </ul>
+            </section>
+            
+            <section>
+              <h3>Drag & Drop</h3>
+              <p><strong>Left-click and drag</strong> to reposition nodes on the map. The layout will adjust automatically.</p>
+            </section>
+            
+            <section>
+              <h3>Keyboard Shortcuts</h3>
+              <ul>
+                <li><strong>Ctrl+Enter</strong> — Generate map from transcript</li>
+                <li><strong>Ctrl+S</strong> — Export as JSON</li>
+              </ul>
+            </section>
           </div>
         </div>
       )}
