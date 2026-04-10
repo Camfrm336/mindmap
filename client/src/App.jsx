@@ -84,6 +84,10 @@ export default function App() {
     // Listen for auth changes
     const { data: { subscription } } = onAuthStateChange((event, session) => {
       setUser(session?.user || null);
+      if (event === 'SIGNED_OUT') {
+        setCurrentMap(null);
+        clearMapHistory();
+      }
       setAuthLoading(false);
     });
 
@@ -95,11 +99,19 @@ export default function App() {
     setAuthError('');
     setAuthSuccess('');
     setAuthLoading(true);
+    
+    // Fallback timeout to ensure loading state is reset
+    const timeoutId = setTimeout(() => {
+      setAuthLoading(false);
+    }, 10000);
+    
     try {
       if (isSignUp) {
-        const result = await signUp(email, password);
+        await signUp(email, password);
+        // Auto sign in after successful signup
+        await signIn(email, password);
         setShowAuth(false);
-        setToast({ message: 'Check your email to confirm your account!', type: 'success' });
+        setToast({ message: 'Account created and signed in!', type: 'success' });
       } else {
         await signIn(email, password);
         setShowAuth(false);
@@ -107,8 +119,14 @@ export default function App() {
       }
     } catch (err) {
       console.error('Auth error:', err.message);
-      setAuthError(err.message);
+      // If signup says "Account created! Please sign in", switch to sign in mode
+      if (err.message === 'Account created! Please sign in.') {
+        setToast({ message: 'Account created! Please sign in.', type: 'success' });
+      } else {
+        setAuthError(err.message);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setAuthLoading(false);
     }
   };
@@ -362,7 +380,7 @@ export default function App() {
       )}
       
       {showAuth && (
-        <div className="auth-overlay" onClick={handleToggleAuth}>
+        <div className="auth-overlay">
           <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
             <Auth 
               onAuth={handleAuth} 
