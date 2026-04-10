@@ -3,6 +3,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// Check if running on Railway (production)
+const isRailway = process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_STATIC_URL;
+
+// For local dev, use localhost. For Railway, use internal DNS.
+const apiTarget = isRailway 
+  ? 'http://voice-mindmap-server.railway.internal:3001'
+  : 'http://localhost:3001';
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -11,7 +19,7 @@ export default defineConfig({
     allowedHosts: ['voice-mindmap-client-production.up.railway.app', 'localhost'],
     proxy: {
       '/api': {
-        target: 'http://voice-mindmap-server.railway.internal:3001',
+        target: apiTarget,
         changeOrigin: true
       }
     }
