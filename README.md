@@ -6,6 +6,7 @@ A voice-to-mind-map web application that transforms transcripts into interactive
 
 - **Node.js 20+** — Run `node --version` to check
 - **Anthropic API Key** — Get a free key at https://console.anthropic.com (Free tier includes $5 credit ≈ 1,600 extractions)
+- **(Optional) Supabase** — For account sync across devices, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to client/.env (works without, defaults to localStorage only)
 
 ## Setup
 
@@ -81,9 +82,11 @@ The prompt controls how Claude interprets and structures your transcript into no
 ## Architecture
 
 - **Frontend**: React 18 + Vite + D3.js (force-directed graph)
-- **Backend**: Express.js + Node.js (no database, localStorage only)
+- **Backend**: Express.js + Node.js
+- **Storage**: localStorage for mind maps + optional Supabase Auth
+- **Auth**: Optional email/password via Supabase (works without, defaults to localStorage)
 - **AI**: Anthropic Claude API (claude-sonnet-4-20250514)
-- **Zero paid services**: No Stripe, no Supabase, no OpenAI
+- **Zero paid services**: No Stripe, no external database, no OpenAI
 
 ## License
 
