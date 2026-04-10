@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    allowedHosts: ['voice-mindmap-client-production.up.railway.app', 'localhost'],
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
