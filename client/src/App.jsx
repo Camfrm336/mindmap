@@ -319,6 +319,11 @@ export default function App() {
                 Sign in / Create account
               </button> to sync your maps across devices and access them anywhere.
             </p>
+            
+            <div className="help-link" onClick={() => setShowHelp(true)}>
+              <span className="help-icon">?</span> How to use this app
+            </div>
+            
             <TranscriptInput
               value={transcript}
               onChange={setTranscript}

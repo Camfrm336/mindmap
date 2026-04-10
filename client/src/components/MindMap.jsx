@@ -26,6 +26,7 @@ export default function MindMap({
   const simulationRef = useRef(null);
   const draggedRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
+  const zoomBehaviorRef = useRef(null);
   
   // Initialize nodes and links
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function MindMap({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
     
-    // Create zoom behavior
+    // Create zoom behavior and store reference
     const zoomBehavior = d3.zoom()
       .scaleExtent([0.2, 3])
       .on('zoom', (event) => {
@@ -62,6 +63,7 @@ export default function MindMap({
       });
     
     svg.call(zoomBehavior);
+    zoomBehaviorRef.current = zoomBehavior;
     
     // Create container for zoom
     const container = svg.append('g').attr('class', 'zoom-container');
@@ -349,14 +351,31 @@ export default function MindMap({
   // Handle zoom
   const handleZoom = (direction) => {
     const svg = d3.select(svgRef.current);
-    const zoomBehavior = d3.zoom().scaleExtent([0.2, 3]);
-    svg.transition().duration(300).call(zoomBehavior.scaleBy, direction === 'in' ? 1.3 : 0.7);
+    if (!svgRef.current || !zoomBehaviorRef.current) return;
+    
+    // Get current scale from the SVG
+    const transform = d3.zoomTransform(svgRef.current);
+    const scaleFactor = direction === 'in' ? 1.2 : 0.8;
+    let newScale = transform.k * scaleFactor;
+    
+    // Clamp to limits
+    newScale = Math.max(0.2, Math.min(3, newScale));
+    
+    // Apply zoom using the stored behavior
+    svg.transition().duration(200).call(
+      zoomBehaviorRef.current.scaleTo,
+      newScale
+    );
   };
   
   const handleResetZoom = () => {
     const svg = d3.select(svgRef.current);
-    const zoomBehavior = d3.zoom().scaleExtent([0.2, 3]);
-    svg.transition().duration(300).call(zoomBehavior.transform, d3.zoomIdentity);
+    if (!svgRef.current || !zoomBehaviorRef.current) return;
+    
+    svg.transition().duration(300).call(
+      zoomBehaviorRef.current.transform,
+      d3.zoomIdentity
+    );
   };
   
   // Handle context menu actions
