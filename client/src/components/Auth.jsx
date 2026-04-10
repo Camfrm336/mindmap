@@ -71,7 +71,7 @@ export default function Auth({ onAuth, isLoading, error, successMessage, onClear
             <div className="auth-error">{error || localError}</div>
           )}
           
-          {successMessage && !isSignUp && (
+          {successMessage && (
             <div className="auth-success">{successMessage}</div>
           )}
           

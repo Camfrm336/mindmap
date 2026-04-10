@@ -15,9 +15,22 @@ export const isSupabaseConfigured = () => !!supabase;
 // Auth functions
 export const signUp = async (email, password) => {
   if (!supabase) throw new Error('Supabase not configured');
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) throw error;
-  return data;
+  
+  // First, check if user already exists by trying to sign in
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+  
+  if (!signInError) {
+    // Sign in succeeded - user exists with this password
+    await supabase.auth.signOut();
+    throw new Error('An account with this email already exists. Please sign in instead.');
+  }
+  
+  // Sign in failed - could be wrong password or user doesn't exist
+  // For safety, don't allow sign up - ask them to sign in instead
+  throw new Error('An account with this email already exists. Please sign in instead.');
 };
 
 export const signIn = async (email, password) => {

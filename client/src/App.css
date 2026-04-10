@@ -623,7 +623,6 @@
 
 /* Auth styles */
 .auth-container {
-  padding: 20px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -760,6 +759,7 @@
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+  padding: 0 16px;
 }
 
 .free-badge {
@@ -798,6 +798,24 @@
 
 .auth-link-button:hover {
   opacity: 0.8;
+}
+
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.auth-modal {
+  animation: slideUp 0.2s ease;
 }
 
 .auth-close-button {

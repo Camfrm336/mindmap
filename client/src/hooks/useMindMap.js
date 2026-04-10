@@ -319,7 +319,15 @@ export function useMindMap(user = null) {
     setSelectedNodeId(null);
   }, []);
   
-  // Handle clear history
+  // Clear history without confirmation (for use on sign out)
+  const clearHistorySilently = useCallback(() => {
+    setMapHistory([]);
+    setCurrentMap(null);
+    setSelectedNodeId(null);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+  
+  // Handle clear history (with confirmation)
   const handleClearHistory = useCallback(async () => {
     if (window.confirm('Clear all history? This cannot be undone.')) {
       // Delete all maps from Supabase if logged in
@@ -418,6 +426,7 @@ export function useMindMap(user = null) {
     currentMap,
     setCurrentMap,
     mapHistory,
+    clearMapHistory: clearHistorySilently,
     selectedNodeId,
     setSelectedNodeId,
     toast,

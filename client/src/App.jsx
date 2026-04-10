@@ -47,6 +47,7 @@ export default function App() {
     currentMap,
     setCurrentMap,
     mapHistory,
+    clearMapHistory,
     selectedNodeId,
     setSelectedNodeId,
     toast,
@@ -96,13 +97,16 @@ export default function App() {
     setAuthLoading(true);
     try {
       if (isSignUp) {
-        await signUp(email, password);
-        setAuthSuccess('Check your email to confirm your account!');
+        const result = await signUp(email, password);
+        setShowAuth(false);
+        setToast({ message: 'Check your email to confirm your account!', type: 'success' });
       } else {
         await signIn(email, password);
-        setToast('Signed in successfully!', 'success');
+        setShowAuth(false);
+        setToast({ message: 'Signed in successfully!', type: 'success' });
       }
     } catch (err) {
+      console.error('Auth error:', err.message);
       setAuthError(err.message);
     } finally {
       setAuthLoading(false);
@@ -125,8 +129,8 @@ export default function App() {
       await signOut();
       setUser(null);
       setCurrentMap(null);
-      setShowLanding(true);
-      setToast('Signed out successfully', 'info');
+      clearMapHistory();
+      setToast({ message: 'Signed out successfully', type: 'info' });
     } catch (err) {
       setError(err.message);
     }
@@ -281,73 +285,52 @@ export default function App() {
             </section>
           </>
         ) : (
-          <div className="auth-prompt">
-            {!supabaseConfigured ? (
-              <div className="auth-setup-needed">
-                <p>Supabase not configured.</p>
-                <p className="setup-hint">Add your Supabase URL and key to client/.env to enable cloud sync.</p>
-              </div>
-            ) : (
-              <>
-                <div className="free-use-section">
-                  <div className="free-badge">Free to use</div>
-                  <p className="free-description">
-                    Create mind maps without an account. Your maps are saved locally in your browser.
-                  </p>
-                  <p className="free-description">
-                    <button className="auth-link-button" onClick={handleToggleAuth}>
-                      Sign in / Create account
-                    </button> to sync your maps across devices and access them anywhere.
-                  </p>
-                  <TranscriptInput
-                    value={transcript}
-                    onChange={setTranscript}
-                    onSubmit={handleExtract}
-                    isLoading={isLoading}
-                    charCount={transcript.length}
-                    maxChars={50000}
-                  />
-                  
-                  {error && (
-                    <div className="error-banner">{error}</div>
-                  )}
-                  
-                  <section className="history-section">
-                    <h3>Recent maps ({mapHistory.length})</h3>
-                    {mapHistory.map((map, index) => (
-                      <div
-                        key={map.id || map.createdAt || index}
-                        className="history-item"
-                        onClick={() => handleSelectFromHistory(map)}
-                      >
-                        <div className="history-title">{map.title}</div>
-                        <div className="history-meta">
-                          {map.nodes?.length || 0} nodes · {timeAgo(map.createdAt)}
-                        </div>
-                      </div>
-                    ))}
-                    {mapHistory.length > 0 && (
-                      <button 
-                        className="clear-history-button"
-                        onClick={handleClearHistory}
-                      >
-                        Clear history
-                      </button>
-                    )}
-                  </section>
-                </div>
-                {showAuth && (
-                  <Auth 
-                    onAuth={handleAuth} 
-                    isLoading={authLoading} 
-                    error={authError} 
-                    successMessage={authSuccess}
-                    onClearSuccess={handleClearAuthSuccess}
-                    onClose={handleToggleAuth}
-                  />
-                )}
-              </>
+          <div className="free-use-section">
+            <div className="free-badge">Free to use</div>
+            <p className="free-description">
+              Create mind maps without an account. Your maps are saved locally in your browser.
+            </p>
+            <p className="free-description">
+              <button className="auth-link-button" onClick={handleToggleAuth}>
+                Sign in / Create account
+              </button> to sync your maps across devices and access them anywhere.
+            </p>
+            <TranscriptInput
+              value={transcript}
+              onChange={setTranscript}
+              onSubmit={handleExtract}
+              isLoading={isLoading}
+              charCount={transcript.length}
+              maxChars={50000}
+            />
+            
+            {error && (
+              <div className="error-banner">{error}</div>
             )}
+            
+            <section className="history-section">
+              <h3>Recent maps ({mapHistory.length})</h3>
+              {mapHistory.map((map, index) => (
+                <div
+                  key={map.id || map.createdAt || index}
+                  className="history-item"
+                  onClick={() => handleSelectFromHistory(map)}
+                >
+                  <div className="history-title">{map.title}</div>
+                  <div className="history-meta">
+                    {map.nodes?.length || 0} nodes · {timeAgo(map.createdAt)}
+                  </div>
+                </div>
+              ))}
+              {mapHistory.length > 0 && (
+                <button 
+                  className="clear-history-button"
+                  onClick={handleClearHistory}
+                >
+                  Clear history
+                </button>
+              )}
+            </section>
           </div>
         )}
       </aside>
@@ -376,6 +359,25 @@ export default function App() {
           type={toast.type}
           onClose={() => setToast(null)}
         />
+      )}
+      
+      {showAuth && (
+        <div className="auth-overlay" onClick={handleToggleAuth}>
+          <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
+            <Auth 
+              onAuth={handleAuth} 
+              isLoading={authLoading} 
+              error={authError} 
+              successMessage={authSuccess}
+              onClearSuccess={handleClearAuthSuccess}
+              onClose={() => {
+                if (!authLoading) {
+                  handleToggleAuth();
+                }
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
