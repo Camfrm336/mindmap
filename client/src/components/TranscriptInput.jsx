@@ -33,7 +33,7 @@ export default function TranscriptInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder="Paste your podcast transcript, meeting notes, lecture, or any spoken content here...
 
-Tip: Use Ctrl+Enter to generate"
+You can also generate a sample text below."
         rows={8}
         disabled={isLoading}
       />

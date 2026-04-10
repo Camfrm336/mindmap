@@ -38,6 +38,8 @@ export default function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [splitPosition, setSplitPosition] = useState(55); // percentage for top section
+  const [isDragging, setIsDragging] = useState(false);
   
   const {
     transcript,
@@ -155,6 +157,41 @@ export default function App() {
     }
   };
 
+  // Split panel drag handlers
+  const handleDragStart = (e) => {
+    setIsDragging(true);
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+  };
+
+  const handleDrag = (e) => {
+    if (!isDragging) return;
+    const container = document.querySelector('.panel-left');
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const percentage = (y / rect.height) * 100;
+    // Clamp between 20% and 80%
+    setSplitPosition(Math.max(20, Math.min(80, percentage)));
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleDrag);
+      document.addEventListener('mouseup', handleDragEnd);
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleDrag);
+      document.removeEventListener('mouseup', handleDragEnd);
+    };
+  }, [isDragging]);
+
   // Handle getting started from landing page
   const handleGetStarted = () => {
     setShowLanding(false);
@@ -261,105 +298,127 @@ export default function App() {
         </header>
         
         {user ? (
-          <>
-            <div className="user-bar">
-              <span className="user-email">{user.email}</span>
-              <button className="sign-out-button" onClick={handleSignOut}>Sign Out</button>
-            </div>
-            
-            <div className="help-link" onClick={() => setShowHelp(true)}>
-              <span className="help-icon">?</span> How to use this app
-            </div>
-            
-            <TranscriptInput
-              value={transcript}
-              onChange={setTranscript}
-              onSubmit={handleExtract}
-              isLoading={isLoading}
-              charCount={transcript.length}
-              maxChars={50000}
-            />
-            
-            {error && (
-              <div className="error-banner">{error}</div>
-            )}
-            
-            <section className="history-section">
-              <h3>Recent maps ({mapHistory.length})</h3>
-              {mapHistory.map((map, index) => (
-                <div
-                  key={map.id || map.createdAt || index}
-                  className="history-item"
-                  onClick={() => handleSelectFromHistory(map)}
-                >
-                  <div className="history-title">{map.title}</div>
-                  <div className="history-meta">
-                    {map.nodes?.length || 0} nodes · {timeAgo(map.createdAt)}
-                  </div>
-                </div>
-              ))}
-              {mapHistory.length > 0 && (
-                <button 
-                  className="clear-history-button"
-                  onClick={handleClearHistory}
-                >
-                  Clear history
-                </button>
+          <div className="sidebar-split">
+            <div className="sidebar-top" style={{ height: `${splitPosition}%` }}>
+              <div className="user-bar">
+                <span className="user-email">{user.email}</span>
+                <button className="sign-out-button" onClick={handleSignOut}>Sign Out</button>
+              </div>
+              
+              <div className="help-link" onClick={() => setShowHelp(true)}>
+                <span className="help-icon">?</span> How to use this app
+              </div>
+              
+              <TranscriptInput
+                value={transcript}
+                onChange={setTranscript}
+                onSubmit={handleExtract}
+                isLoading={isLoading}
+                charCount={transcript.length}
+                maxChars={50000}
+              />
+              
+              {error && (
+                <div className="error-banner">{error}</div>
               )}
-            </section>
-          </>
+            </div>
+            
+            <div 
+              className="sidebar-divider"
+              onMouseDown={handleDragStart}
+            >
+              <div className="divider-handle"></div>
+            </div>
+            
+            <div className="sidebar-bottom" style={{ height: `${100 - splitPosition}%` }}>
+              <section className="history-section">
+                <h3>Recent maps ({mapHistory.length})</h3>
+                {mapHistory.map((map, index) => (
+                  <div
+                    key={map.id || map.createdAt || index}
+                    className="history-item"
+                    onClick={() => handleSelectFromHistory(map)}
+                  >
+                    <div className="history-title">{map.title}</div>
+                    <div className="history-meta">
+                      {map.nodes?.length || 0} nodes · {timeAgo(map.createdAt)}
+                    </div>
+                  </div>
+                ))}
+                {mapHistory.length > 0 && (
+                  <button 
+                    className="clear-history-button"
+                    onClick={handleClearHistory}
+                  >
+                    Clear history
+                  </button>
+                )}
+              </section>
+            </div>
+          </div>
         ) : (
-          <div className="free-use-section">
-            <div className="free-badge">Free to use</div>
-            <p className="free-description">
-              Create mind maps without an account. Your maps are saved locally in your browser.
-            </p>
-            <p className="free-description">
-              <button className="auth-link-button" onClick={handleToggleAuth}>
-                Sign in / Create account
-              </button> to sync your maps across devices and access them anywhere.
-            </p>
-            
-            <div className="help-link" onClick={() => setShowHelp(true)}>
-              <span className="help-icon">?</span> How to use this app
+          <div className="sidebar-split">
+            <div className="sidebar-top" style={{ height: `${splitPosition}%` }}>
+              <div className="free-badge">Free to use</div>
+              <p className="free-description">
+                Create mind maps without an account. Your maps are saved locally in your browser.
+              </p>
+              <p className="free-description">
+                <button className="auth-link-button" onClick={handleToggleAuth}>
+                  Sign in / Create account
+                </button> to sync your maps across devices and access them anywhere.
+              </p>
+              
+              <div className="help-link" onClick={() => setShowHelp(true)}>
+                <span className="help-icon">?</span> How to use this app
+              </div>
+              
+              <TranscriptInput
+                value={transcript}
+                onChange={setTranscript}
+                onSubmit={handleExtract}
+                isLoading={isLoading}
+                charCount={transcript.length}
+                maxChars={50000}
+              />
+              
+              {error && (
+                <div className="error-banner">{error}</div>
+              )}
             </div>
             
-            <TranscriptInput
-              value={transcript}
-              onChange={setTranscript}
-              onSubmit={handleExtract}
-              isLoading={isLoading}
-              charCount={transcript.length}
-              maxChars={50000}
-            />
+            <div 
+              className="sidebar-divider"
+              onMouseDown={handleDragStart}
+            >
+              <div className="divider-handle"></div>
+            </div>
             
-            {error && (
-              <div className="error-banner">{error}</div>
-            )}
-            
-            <section className="history-section">
-              <h3>Recent maps ({mapHistory.length})</h3>
-              {mapHistory.map((map, index) => (
-                <div
-                  key={map.id || map.createdAt || index}
-                  className="history-item"
-                  onClick={() => handleSelectFromHistory(map)}
-                >
-                  <div className="history-title">{map.title}</div>
-                  <div className="history-meta">
-                    {map.nodes?.length || 0} nodes · {timeAgo(map.createdAt)}
+            <div className="sidebar-bottom" style={{ height: `${100 - splitPosition}%` }}>
+              <section className="history-section">
+                <h3>Recent maps ({mapHistory.length})</h3>
+                {mapHistory.map((map, index) => (
+                  <div
+                    key={map.id || map.createdAt || index}
+                    className="history-item"
+                    onClick={() => handleSelectFromHistory(map)}
+                  >
+                    <div className="history-title">{map.title}</div>
+                    <div className="history-meta">
+                      {map.nodes?.length || 0} nodes · {timeAgo(map.createdAt)}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {mapHistory.length > 0 && (
-                <button 
-                  className="clear-history-button"
-                  onClick={handleClearHistory}
-                >
-                  Clear history
-                </button>
-              )}
-            </section>
+                ))}
+                {mapHistory.length > 0 && (
+                  <button 
+                    className="clear-history-button"
+                    onClick={handleClearHistory}
+                  >
+                    Clear history
+                  </button>
+                )}
+              </section>
+            </div>
           </div>
         )}
       </aside>
