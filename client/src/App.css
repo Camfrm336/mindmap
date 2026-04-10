@@ -348,6 +348,48 @@
   padding: 4px 8px;
   outline: none;
   width: 300px;
+  max-width: 100%;
+}
+
+/* Mobile toolbar adjustments */
+@media (max-width: 600px) {
+  .toolbar {
+    padding: 0 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+    height: auto;
+    min-height: 52px;
+    padding: 8px 12px;
+  }
+  
+  .toolbar-left {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .map-title {
+    font-size: 14px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  
+  .title-input {
+    width: 100%;
+    max-width: 200px;
+    font-size: 14px;
+  }
+  
+  .toolbar-right {
+    flex-shrink: 0;
+  }
+  
+  .toolbar-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
 }
 
 .toolbar-right {
