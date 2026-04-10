@@ -22,6 +22,7 @@ export default function MindMap({
   const [contextMenu, setContextMenu] = useState(null);
   const [editingNode, setEditingNode] = useState(null);
   const [editingPosition, setEditingPosition] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null); // { type, node }
   const simulationRef = useRef(null);
   const draggedRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
@@ -323,6 +324,29 @@ export default function MindMap({
     };
   }, [nodes, links, selectedNodeId, onSelectNode]);
   
+  // Update node colors when nodes change
+  useEffect(() => {
+    if (!svgRef.current) return;
+    
+    setTimeout(() => {
+      d3.select(svgRef.current).selectAll('.nodes g').each(function(d) {
+        const g = d3.select(this);
+        const depth = d.depth;
+        
+        if (depth === 0) {
+          // Root node - solid color
+          g.select('.node-bg').attr('fill', getCategoryColor(d.category));
+        } else {
+          // Depth 1+ - category color with opacity + category border + dot
+          g.select('.node-bg')
+            .attr('fill', getCategoryColorAlpha(d.category, 0.2))
+            .attr('stroke', getCategoryColor(d.category));
+          g.select('.category-dot').attr('fill', getCategoryColor(d.category));
+        }
+      });
+    }, 100);
+  }, [nodes]);
+  
   // Handle zoom
   const handleZoom = (direction) => {
     const svg = d3.select(svgRef.current);
@@ -348,16 +372,15 @@ export default function MindMap({
         setEditingPosition({ x: node.x, y: node.y });
         setEditingNode(node);
         break;
-      case 'expand':
-        if (node.depth >= 3) return;
-        if (window.confirm(`Ask AI to expand on "${node.label}"?`)) {
-          onExpandNode(node.id, node.label);
-        }
+      case 'expand': {
+        // Check if node already has children (was already expanded)
+        const hasChildren = nodes.some(n => n.parentId === node.id);
+        if (node.depth >= 3 || hasChildren) return;
+        setConfirmAction({ type: 'expand', node });
         break;
+      }
       case 'delete':
-        if (window.confirm(`Delete "${node.label}" and all its children?`)) {
-          onDeleteNode(node.id);
-        }
+        setConfirmAction({ type: 'delete', node });
         break;
       case 'copy':
         navigator.clipboard.writeText(node.label);
@@ -412,9 +435,9 @@ export default function MindMap({
           <button onClick={() => handleContextAction('edit')}>Edit label</button>
           <button 
             onClick={() => handleContextAction('expand')}
-            disabled={contextMenu.node?.depth >= 3}
+            disabled={contextMenu.node?.depth >= 3 || nodes.some(n => n.parentId === contextMenu.node?.id)}
           >
-            {contextMenu.node?.depth >= 3 ? 'Max depth reached' : 'Expand this topic'}
+            {contextMenu.node?.depth >= 3 ? 'Max depth reached' : nodes.some(n => n.parentId === contextMenu.node?.id) ? 'Already expanded' : 'Expand this topic'}
           </button>
           <button onClick={() => handleContextAction('delete')}>Delete node</button>
           <button onClick={() => handleContextAction('copy')}>Copy label</button>
@@ -431,6 +454,40 @@ export default function MindMap({
           }}
           onCancel={() => setEditingNode(null)}
         />
+      )}
+      
+      {confirmAction && (
+        <div className="confirm-overlay" onClick={() => setConfirmAction(null)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{confirmAction.type === 'expand' ? 'Expand Topic' : 'Delete Node'}</h3>
+            <p>
+              {confirmAction.type === 'expand' 
+                ? `Ask AI to expand on "${confirmAction.node.label}"?`
+                : `Delete "${confirmAction.node.label}" and all its children? This cannot be undone.`}
+            </p>
+            <div className="confirm-buttons">
+              <button 
+                className="confirm-cancel"
+                onClick={() => setConfirmAction(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirm-ok"
+                onClick={() => {
+                  if (confirmAction.type === 'expand') {
+                    onExpandNode(confirmAction.node.id, confirmAction.node.label);
+                  } else {
+                    onDeleteNode(confirmAction.node.id);
+                  }
+                  setConfirmAction(null);
+                }}
+              >
+                {confirmAction.type === 'expand' ? 'Expand' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

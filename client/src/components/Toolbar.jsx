@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 export default function Toolbar({ map, onExport }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(map?.title || '');
+  const [showHelp, setShowHelp] = useState(false);
   
   const handleTitleClick = () => {
     setIsEditing(true);
@@ -43,6 +44,14 @@ export default function Toolbar({ map, onExport }) {
         )}
       </div>
       <div className="toolbar-right">
+        <button className="toolbar-button" onClick={() => setShowHelp(true)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Help
+        </button>
         <button className="toolbar-button" onClick={() => onExport('png')}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -69,6 +78,40 @@ export default function Toolbar({ map, onExport }) {
           JSON
         </button>
       </div>
+      
+      {showHelp && (
+        <div className="help-overlay" onClick={() => setShowHelp(false)}>
+          <div className="help-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="help-close" onClick={() => setShowHelp(false)}>&times;</button>
+            <h2>How to Use</h2>
+            
+            <section>
+              <h3>Node Actions</h3>
+              <p>Right-click on any node to:</p>
+              <ul>
+                <li><strong>Edit label</strong> — Change the node text</li>
+                <li><strong>Expand</strong> — Ask AI to add more subtopics (max 3 levels)</li>
+                <li><strong>Delete</strong> — Remove the node and its children</li>
+                <li><strong>Copy</strong> — Copy the node text to clipboard</li>
+              </ul>
+            </section>
+            
+            <section>
+              <h3>Drag & Drop</h3>
+              <p>Drag nodes to reposition them on the map. The layout will adjust automatically.</p>
+            </section>
+            
+            <section>
+              <h3>Keyboard Shortcuts</h3>
+              <ul>
+                <li><strong>Ctrl+Enter</strong> — Generate map from transcript</li>
+                <li><strong>Ctrl+S</strong> — Export as JSON</li>
+                <li><strong>Escape</strong> — Deselect node</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
