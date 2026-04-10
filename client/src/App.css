@@ -20,7 +20,7 @@
   .panel-left {
     border-right: none;
     border-bottom: 1px solid var(--border);
-    max-height: 65vh;
+    max-height: 80vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -227,7 +227,7 @@
 @media (max-width: 900px) {
   .history-section {
     flex: none;
-    max-height: 200px;
+    max-height: 300px;
     overflow-y: auto;
   }
 }
