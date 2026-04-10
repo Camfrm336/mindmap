@@ -64,6 +64,23 @@
   }
 }
 
+/* Left Panel */
+.panel-left {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (min-width: 901px) {
+  .panel-left {
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
+
 /* Right Panel */
 .panel-right {
   position: relative;
