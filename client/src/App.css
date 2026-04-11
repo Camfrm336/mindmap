@@ -924,6 +924,7 @@
   font-weight: 500;
   margin-bottom: 12px;
   align-self: flex-start;
+  margin-left: 16px;
 }
 
 .free-description {
@@ -931,6 +932,7 @@
   color: var(--text-secondary);
   margin: 0 0 12px;
   line-height: 1.5;
+  padding: 0 16px;
 }
 
 .free-description strong {
