@@ -2,6 +2,8 @@
 
 A voice-to-mind-map web application that transforms transcripts into interactive, hierarchical visualizations using Claude AI.
 
+## Live at https://voice-mindmap-client-production.up.railway.app/
+
 ## Prerequisites
 
 - **Node.js 20+** — Run `node --version` to check
